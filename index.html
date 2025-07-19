@@ -478,6 +478,10 @@
             youtube_thumbnail: { width: 1280, height: 720 },
             facebook_post: { width: 1200, height: 630 },
         };
+        
+        // NEW: Variables to remember last custom size
+        let lastCustomWidth = 800;
+        let lastCustomHeight = 800;
 
         // --- Functions ---
         function handleTabs(activeBtn) {
@@ -775,17 +779,24 @@
             const value = e.target.value;
             if (value === 'custom') {
                 get('custom-size-inputs').style.display = 'grid';
-                updateCanvasSize(customWidthInput.value, customHeightInput.value);
+                // FIXED: Restore last custom size when switching back to custom
+                customWidthInput.value = lastCustomWidth;
+                customHeightInput.value = lastCustomHeight;
+                updateCanvasSize(lastCustomWidth, lastCustomHeight);
             } else {
                 get('custom-size-inputs').style.display = 'none';
                 const { width, height } = sizePresets[value];
-                customWidthInput.value = width;
-                customHeightInput.value = height;
                 updateCanvasSize(width, height);
             }
         });
-        customWidthInput.addEventListener('input', (e) => { updateCanvasSize(e.target.value, customHeightInput.value); });
-        customHeightInput.addEventListener('input', (e) => { updateCanvasSize(customWidthInput.value, e.target.value); });
+        customWidthInput.addEventListener('input', (e) => { 
+            lastCustomWidth = e.target.value;
+            updateCanvasSize(e.target.value, customHeightInput.value); 
+        });
+        customHeightInput.addEventListener('input', (e) => { 
+            lastCustomHeight = e.target.value;
+            updateCanvasSize(customWidthInput.value, e.target.value); 
+        });
         websiteInput.addEventListener('input', (e) => { websitePreview.innerText = e.target.value; });
         colorPicker.addEventListener('input', (e) => { document.documentElement.style.setProperty('--theme-color', e.target.value); });
         
@@ -887,7 +898,6 @@
         function loadState() {
             const stateJSON = localStorage.getItem('mastaarDesignerState');
             if (!stateJSON) {
-                // FIXED: Initialize canvas size from HTML values when no state is saved
                 updateCanvasSize(customWidthInput.value, customHeightInput.value);
                 syncControlsFromCanvas();
                 return;
@@ -920,6 +930,9 @@
             updateCanvasSize(state.canvas.width, state.canvas.height);
             customWidthInput.value = state.canvas.width;
             customHeightInput.value = state.canvas.height;
+            // FIXED: Update last custom size from loaded state
+            lastCustomWidth = state.canvas.width;
+            lastCustomHeight = state.canvas.height;
             
             document.documentElement.style.setProperty('--theme-color', state.controls.themeColor);
             colorPicker.value = state.controls.themeColor;
