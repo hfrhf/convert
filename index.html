@@ -11,15 +11,14 @@
     <!-- html2canvas library for exporting -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
-    <!-- Google Fonts: Tajawal for Arabic text -->
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=Cairo:wght@400;700;900&family=Lalezar&family=Changa:wght@400;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
         :root {
             --theme-color: #00A9E0;
-            /* NEW: Default background colors as CSS variables */
             --bg-color-top: #1a202c;
             --bg-color-bottom: #2d3748;
         }
@@ -30,10 +29,10 @@
         .canvas-container {
             width: 800px;
             height: 800px;
-            /* UPDATED: Uses CSS variables now */
             background-image: linear-gradient(to bottom, var(--bg-color-top), var(--bg-color-bottom));
             background-size: cover;
             background-position: center;
+            transition: width 0.3s, height 0.3s;
         }
         .glass-effect {
             background: rgba(255, 255, 255, 0.1);
@@ -58,6 +57,7 @@
         .control-panel {
             background-color: white;
             width: 800px;
+            transition: width 0.3s;
         }
         .toggle-switch {
             width: 60px; height: 32px; background-color: #ccc; border-radius: 9999px;
@@ -70,27 +70,24 @@
         input:checked + .toggle-switch { background-color: var(--theme-color); }
         input:checked + .toggle-switch::after { transform: translateX(28px); }
 
-        /* Draggable elements styling */
         .draggable {
             position: absolute;
             cursor: move;
             user-select: none;
         }
-        .draggable:hover {
+        .draggable:hover, .selected-element {
             outline: 2px dashed var(--theme-color);
         }
+        .draggable > svg, .draggable > img {
+            pointer-events: none;
+        }
 
-        /* Control Panel Tabs and Buttons */
         .control-tab.active {
             background-color: var(--theme-color);
             color: white;
         }
-        .control-pane {
-            display: none;
-        }
-        .control-pane.active {
-            display: block;
-        }
+        .control-pane { display: none; }
+        .control-pane.active { display: block; }
         .control-btn-group button.active {
             background-color: var(--theme-color);
             color: white;
@@ -103,53 +100,52 @@
 
     <div class="container mx-auto flex flex-col items-center gap-8">
 
-        <!-- =================================== -->
-        <!-- ===== قسم لوحة العرض (Canvas) ===== -->
-        <!-- =================================== -->
         <div id="capture" class="canvas-container rounded-2xl overflow-hidden relative p-10 glow-active animation-active">
-
             <div id="default-bg-elements" class="absolute inset-0 z-0">
                 <div class="animated-shape absolute -top-1/4 -right-1/4 w-3/4 h-3/4 bg-white/5 rounded-full"></div>
                 <div class="animated-shape absolute -bottom-1/4 -left-1/4 w-2/3 h-2/3 glass-effect rounded-full" style="animation-delay: -5s;"></div>
             </div>
-
-            <header class="absolute top-10 right-10 z-20">
+            <div id="logo-wrapper" class="draggable" style="top: 40px; left: 650px; width: 110px; z-index: 20;">
                 <div class="glass-effect inline-block rounded-lg p-2">
-                    <img id="logo-preview" src="https://i.imgur.com/8Q9g2f2.jpeg" alt="شعار الشركة" class="h-16 w-auto">
+                    <img id="logo-preview" src="https://i.imgur.com/8Q9g2f2.jpeg" alt="شعار الشركة" class="h-auto w-full">
                 </div>
-            </header>
-            
-            <h1 id="title-preview" class="draggable font-black text-white mb-4 leading-tight glowing-text z-10" style="font-size: 72px; color: var(--theme-color); top: 300px; right: 40px; width: 720px; text-align: right;">
+            </div>
+            <h1 id="title-preview" class="draggable font-black text-white mb-4 leading-tight glowing-text z-10" style="font-family: 'Tajawal', sans-serif; font-size: 72px; color: var(--theme-color); top: 300px; left: 40px; width: 720px; text-align: right; z-index: 10;">
                 بناء المستقبل الرقمي
             </h1>
-
-            <p id="description-preview" class="draggable text-gray-300 leading-relaxed z-10" style="font-size: 28px; top: 450px; right: 40px; width: 720px; text-align: right;">
+            <p id="description-preview" class="draggable text-gray-300 leading-relaxed z-10" style="font-family: 'Tajawal', sans-serif; font-size: 28px; top: 450px; left: 40px; width: 720px; text-align: right; z-index: 10;">
                 في Mastaar، نحول الأفكار إلى حلول برمجية مبتكرة تقود مسار نجاحك.
             </p>
-
-            <footer class="absolute bottom-10 right-10 z-20 w-[calc(100%-80px)]">
-                <div class="glowing-line w-1/3 h-2 rounded-full mb-4" style="background-color: var(--theme-color);"></div>
-                <div class="flex items-center justify-end gap-3">
-                    <span id="website-preview" class="text-white text-2xl font-bold tracking-wider">www.mastaar.com</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+            <footer class="z-20">
+                <div id="line-wrapper" class="draggable" style="top: 680px; left: 480px; z-index: 20;">
+                     <div id="glowing-line" class="glowing-line rounded-full" style="background-color: var(--theme-color); width: 240px; height: 8px;"></div>
+                </div>
+                <div id="website-wrapper" class="draggable" style="top: 710px; left: 445px; z-index: 20;">
+                    <div class="flex items-center justify-end gap-3">
+                        <span id="website-preview" class="text-white font-bold tracking-wider" style="font-size: 24px;">www.mastaar.com</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                    </div>
                 </div>
             </footer>
         </div>
 
-        <!-- =================================== -->
-        <!-- ===== قسم لوحة التحكم (Panel) ===== -->
-        <!-- =================================== -->
-        <div class="control-panel p-6 rounded-2xl shadow-lg space-y-6">
-            
+        <div id="control-panel" class="control-panel p-6 rounded-2xl shadow-lg space-y-6">
             <div class="flex border-b">
-                <button id="title-tab-btn" class="control-tab active flex-1 p-3 font-bold text-lg">تعديل العنوان</button>
-                <button id="description-tab-btn" class="control-tab flex-1 p-3 font-bold text-lg">تعديل الوصف</button>
-                 <button id="general-tab-btn" class="control-tab flex-1 p-3 font-bold text-lg">إعدادات عامة</button>
+                <button id="title-tab-btn" class="control-tab active flex-1 p-3 font-bold text-lg">العنوان</button>
+                <button id="description-tab-btn" class="control-tab flex-1 p-3 font-bold text-lg">الوصف</button>
+                <button id="add-element-tab-btn" class="control-tab flex-1 p-3 font-bold text-lg">إضافة عناصر</button>
+                <button id="general-tab-btn" class="control-tab flex-1 p-3 font-bold text-lg">الإعدادات</button>
             </div>
 
             <!-- Title Pane -->
             <div id="title-pane" class="control-pane active space-y-4">
                 <input type="text" id="title-input" placeholder="العنوان الرئيسي" class="w-full p-2 border border-gray-300 rounded-md">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">خط العنوان</label>
+                    <select id="title-font-select" class="w-full mt-1 p-2 border border-gray-300 rounded-md">
+                        <option value="Tajawal">Tajawal</option><option value="Cairo">Cairo</option><option value="Lalezar">Lalezar</option><option value="Changa">Changa</option><option value="Amiri">Amiri</option>
+                    </select>
+                </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700">لون العنوان</label>
@@ -157,13 +153,18 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">حجم العنوان: <span id="title-size-value">72</span>px</label>
-                        <input type="range" id="title-size-slider" min="30" max="120" value="72" class="w-full">
+                        <input type="range" id="title-size-slider" min="30" max="150" value="72" class="w-full">
                     </div>
                 </div>
-                <!-- NEW: Title Width Slider -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">عرض حقل العنوان: <span id="title-width-value">720</span>px</label>
-                    <input type="range" id="title-width-slider" min="200" max="780" value="720" class="w-full">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">عرض الحقل: <span id="title-width-value">720</span>px</label>
+                        <input type="range" id="title-width-slider" min="200" max="1200" value="720" class="w-full">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">الطبقة (z-index)</label>
+                        <input type="number" id="title-zindex-input" value="10" class="w-full p-2 border border-gray-300 rounded-md">
+                    </div>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">محاذاة العنوان</label>
@@ -178,6 +179,12 @@
             <!-- Description Pane -->
             <div id="description-pane" class="control-pane space-y-4">
                 <textarea id="description-input" rows="3" placeholder="الوصف" class="w-full p-2 border border-gray-300 rounded-md"></textarea>
+                 <div>
+                    <label class="block text-sm font-medium text-gray-700">خط الوصف</label>
+                    <select id="description-font-select" class="w-full mt-1 p-2 border border-gray-300 rounded-md">
+                        <option value="Tajawal">Tajawal</option><option value="Cairo">Cairo</option><option value="Lalezar">Lalezar</option><option value="Changa">Changa</option><option value="Amiri">Amiri</option>
+                    </select>
+                </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700">لون الوصف</label>
@@ -185,13 +192,18 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">حجم الوصف: <span id="description-size-value">28</span>px</label>
-                        <input type="range" id="description-size-slider" min="14" max="50" value="28" class="w-full">
+                        <input type="range" id="description-size-slider" min="14" max="80" value="28" class="w-full">
                     </div>
                 </div>
-                <!-- NEW: Description Width Slider -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">عرض حقل الوصف: <span id="description-width-value">720</span>px</label>
-                    <input type="range" id="description-width-slider" min="200" max="780" value="720" class="w-full">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">عرض الحقل: <span id="description-width-value">720</span>px</label>
+                        <input type="range" id="description-width-slider" min="200" max="1200" value="720" class="w-full">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">الطبقة (z-index)</label>
+                        <input type="number" id="description-zindex-input" value="10" class="w-full p-2 border border-gray-300 rounded-md">
+                    </div>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">محاذاة الوصف</label>
@@ -203,46 +215,145 @@
                 </div>
             </div>
 
-            <!-- General Settings Pane -->
-            <div id="general-pane" class="control-pane space-y-4">
-                 <input type="text" id="website-input" placeholder="رابط الموقع" class="w-full p-2 border border-gray-300 rounded-md">
-                 <div class="grid grid-cols-2 gap-4">
-                     <div>
-                         <label class="block text-sm font-medium text-gray-700 mb-1">رفع الشعار</label>
-                         <input type="file" id="logo-upload" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-                     </div>
-                     <div>
-                         <label class="block text-sm font-medium text-gray-700 mb-1">اللون الأساسي (للتوهج)</label>
-                         <input type="color" id="color-picker" value="#00A9E0" class="w-full h-10 p-1 border border-gray-300 rounded-md cursor-pointer">
-                     </div>
-                 </div>
-                 <!-- NEW: Background Color Pickers -->
-                 <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">لون الخلفية (علوي)</label>
-                        <input type="color" id="bg-color-top" value="#1a202c" class="w-full h-10 p-1 border border-gray-300 rounded-md cursor-pointer">
+            <!-- Add Elements Pane -->
+            <div id="add-element-pane" class="control-pane space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">رفع أيقونة أو صورة (PNG, SVG)</label>
+                    <input type="file" id="custom-icon-upload" accept="image/png, image/svg+xml" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-50 file:text-gray-700 hover:file:bg-gray-100">
+                </div>
+                <hr>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">أو لصق كود SVG</label>
+                    <textarea id="svg-code-input" rows="4" placeholder='<svg>...</svg>' class="w-full mt-1 p-2 border border-gray-300 rounded-md font-mono text-sm"></textarea>
+                    <button id="add-svg-btn" class="w-full mt-2 bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600">إضافة SVG من الكود</button>
+                </div>
+                <hr>
+                <div id="element-editor-view" class="hidden space-y-4">
+                    <h4 class="font-bold text-md">تعديل العنصر المحدد</h4>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div id="editor-color-control">
+                            <label class="block text-sm font-medium text-gray-700">لون العنصر</label>
+                            <input type="color" id="element-color-picker" value="#FFFFFF" class="w-full h-10 p-1 border border-gray-300 rounded-md cursor-pointer">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">الطبقة (z-index)</label>
+                            <input type="number" id="element-zindex-input" value="15" class="w-full p-2 border border-gray-300 rounded-md">
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">لون الخلفية (سفلي)</label>
-                        <input type="color" id="bg-color-bottom" value="#2d3748" class="w-full h-10 p-1 border border-gray-300 rounded-md cursor-pointer">
+                    <div id="editor-size-control">
+                        <label class="block text-sm font-medium text-gray-700">حجم العنصر: <span id="element-size-value">48</span>px</label>
+                        <input type="range" id="element-size-slider" min="16" max="512" value="48" class="w-full">
+                    </div>
+                    <div class="flex gap-4">
+                        <button id="delete-element-btn" class="w-full bg-red-500 text-white p-2 rounded-md hover:bg-red-600">حذف العنصر</button>
+                        <button id="deselect-element-btn" class="w-full bg-gray-200 p-2 rounded-md hover:bg-gray-300">إلغاء التحديد</button>
                     </div>
                 </div>
-                 <div class="flex items-end gap-4">
-                     <div class="flex-grow">
-                         <label class="block text-sm font-medium text-gray-700 mb-1">رفع صورة خلفية</label>
-                         <input type="file" id="bg-upload" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-50 file:text-gray-700 hover:file:bg-gray-100">
-                     </div>
-                     <button id="reset-bg-btn" class="px-3 py-2 text-sm bg-gray-200 rounded-md hover:bg-gray-300 whitespace-nowrap">إعادة تعيين الخلفية</button>
-                 </div>
-                  <div class="flex justify-around pt-2">
-                      <label for="glow-toggle" class="flex items-center gap-3 cursor-pointer"><span class="font-medium">تفعيل التوهج</span><input type="checkbox" id="glow-toggle" class="sr-only" checked><div class="toggle-switch"></div></label>
-                      <label for="animation-toggle" class="flex items-center gap-3 cursor-pointer"><span class="font-medium">تفعيل الحركة</span><input type="checkbox" id="animation-toggle" class="sr-only" checked><div class="toggle-switch"></div></label>
-                  </div>
+            </div>
+
+            <!-- General Settings Pane -->
+            <div id="general-pane" class="control-pane space-y-4">
+                <div class="p-4 border rounded-lg space-y-3">
+                    <h4 class="font-bold text-md">مقاسات التصميم</h4>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">مقاسات جاهزة</label>
+                        <select id="size-preset-select" class="w-full mt-1 p-2 border border-gray-300 rounded-md">
+                            <option value="custom">مخصص (الافتراضي)</option><option value="instagram_post">بوست انستغرام (1080x1080)</option><option value="instagram_story">ستوري انستغرام (1080x1920)</option><option value="youtube_thumbnail">صورة مصغرة يوتيوب (1280x720)</option><option value="facebook_post">بوست فيسبوك (1200x630)</option>
+                        </select>
+                    </div>
+                    <div id="custom-size-inputs" class="grid grid-cols-2 gap-4">
+                        <div>
+                           <label class="block text-sm font-medium text-gray-700">العرض (px)</label>
+                           <input type="number" id="custom-width-input" value="800" class="w-full mt-1 p-2 border border-gray-300 rounded-md">
+                        </div>
+                        <div>
+                           <label class="block text-sm font-medium text-gray-700">الارتفاع (px)</label>
+                           <input type="number" id="custom-height-input" value="800" class="w-full mt-1 p-2 border border-gray-300 rounded-md">
+                        </div>
+                    </div>
+                </div>
+                <div class="p-4 border rounded-lg space-y-3">
+                    <h4 class="font-bold text-md">عناصر عامة</h4>
+                    <input type="text" id="website-input" placeholder="رابط الموقع" class="w-full p-2 border border-gray-300 rounded-md">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">رفع الشعار</label>
+                        <input type="file" id="logo-upload" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">حجم الشعار: <span id="logo-size-value">110</span>px</label>
+                            <input type="range" id="logo-size-slider" min="20" max="400" value="110" class="w-full">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">طبقة الشعار</label>
+                            <input type="number" id="logo-zindex-input" value="20" class="w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">اللون الأساسي (للتوهج)</label>
+                        <input type="color" id="color-picker" value="#00A9E0" class="w-full h-10 p-1 border border-gray-300 rounded-md cursor-pointer">
+                    </div>
+                </div>
+                <div class="p-4 border rounded-lg space-y-3">
+                    <h4 class="font-bold text-md">عناصر التذييل</h4>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">حجم خط الرابط: <span id="website-size-value">24</span>px</label>
+                            <input type="range" id="website-size-slider" min="10" max="60" value="24" class="w-full">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">طبقة الرابط</label>
+                            <input type="number" id="website-zindex-input" value="20" class="w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">عرض الشريط: <span id="line-width-value">240</span>px</label>
+                            <input type="range" id="line-width-slider" min="10" max="800" value="240" class="w-full">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">ارتفاع الشريط: <span id="line-height-value">8</span>px</label>
+                            <input type="range" id="line-height-slider" min="1" max="50" value="8" class="w-full">
+                        </div>
+                    </div>
+                     <div>
+                        <label class="block text-sm font-medium text-gray-700">طبقة الشريط</label>
+                        <input type="number" id="line-zindex-input" value="20" class="w-full p-2 border border-gray-300 rounded-md">
+                    </div>
+                </div>
+                 <div class="p-4 border rounded-lg space-y-3">
+                    <h4 class="font-bold text-md">إعدادات الخلفية</h4>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">لون الخلفية (علوي)</label>
+                            <input type="color" id="bg-color-top" value="#1a202c" class="w-full h-10 p-1 border border-gray-300 rounded-md cursor-pointer">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">لون الخلفية (سفلي)</label>
+                            <input type="color" id="bg-color-bottom" value="#2d3748" class="w-full h-10 p-1 border border-gray-300 rounded-md cursor-pointer">
+                        </div>
+                    </div>
+                    <div class="flex items-end gap-4">
+                         <div class="flex-grow">
+                             <label class="block text-sm font-medium text-gray-700 mb-1">رفع صورة خلفية</label>
+                             <input type="file" id="bg-upload" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-50 file:text-gray-700 hover:file:bg-gray-100">
+                         </div>
+                         <button id="reset-bg-btn" class="px-3 py-2 text-sm bg-gray-200 rounded-md hover:bg-gray-300 whitespace-nowrap">إعادة تعيين</button>
+                    </div>
+                </div>
+                <div class="flex justify-around pt-2">
+                    <label for="glow-toggle" class="flex items-center gap-3 cursor-pointer"><span class="font-medium">تفعيل التوهج</span><input type="checkbox" id="glow-toggle" class="sr-only" checked><div class="toggle-switch"></div></label>
+                    <label for="animation-toggle" class="flex items-center gap-3 cursor-pointer"><span class="font-medium">تفعيل الحركة</span><input type="checkbox" id="animation-toggle" class="sr-only" checked><div class="toggle-switch"></div></label>
+                </div>
             </div>
 
             <hr/>
 
             <div class="flex items-end justify-between gap-4">
+                <div class="flex gap-2">
+                    <button id="save-state-btn" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors">حفظ الإعدادات</button>
+                    <button id="reset-state-btn" class="bg-red-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-red-700 transition-colors">إعادة تعيين الكل</button>
+                </div>
                 <div class="flex items-center gap-4">
                     <div>
                         <label for="format" class="block text-sm font-medium text-gray-700">نوع الصورة</label>
@@ -261,92 +372,122 @@
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         // --- Get Elements ---
-        const captureElement = document.getElementById('capture');
-        const defaultBgElements = document.getElementById('default-bg-elements');
+        const get = (id) => document.getElementById(id);
+        const captureElement = get('capture');
+        const controlPanel = get('control-panel');
         
-        // Canvas elements
-        const titlePreview = document.getElementById('title-preview');
-        const descriptionPreview = document.getElementById('description-preview');
-        const websitePreview = document.getElementById('website-preview');
-        const logoPreview = document.getElementById('logo-preview');
+        // Draggable Elements
+        const titlePreview = get('title-preview');
+        const descriptionPreview = get('description-preview');
+        const logoWrapper = get('logo-wrapper');
+        const lineWrapper = get('line-wrapper');
+        const websiteWrapper = get('website-wrapper');
         
-        // Input elements
-        const titleInput = document.getElementById('title-input');
-        const descriptionInput = document.getElementById('description-input');
-        const websiteInput = document.getElementById('website-input');
-        const logoUpload = document.getElementById('logo-upload');
-        const bgUpload = document.getElementById('bg-upload');
-        const resetBgBtn = document.getElementById('reset-bg-btn');
-        const colorPicker = document.getElementById('color-picker');
-        
-        // NEW: Background color pickers
-        const bgColorTop = document.getElementById('bg-color-top');
-        const bgColorBottom = document.getElementById('bg-color-bottom');
-
-        // Title controls
-        const titleColorPicker = document.getElementById('title-color-picker');
-        const titleSizeSlider = document.getElementById('title-size-slider');
-        const titleSizeValue = document.getElementById('title-size-value');
-        const titleAlignGroup = document.getElementById('title-align-group');
-        const titleWidthSlider = document.getElementById('title-width-slider'); // NEW
-        const titleWidthValue = document.getElementById('title-width-value'); // NEW
-        
-        // Description controls
-        const descriptionColorPicker = document.getElementById('description-color-picker');
-        const descriptionSizeSlider = document.getElementById('description-size-slider');
-        const descriptionSizeValue = document.getElementById('description-size-value');
-        const descriptionAlignGroup = document.getElementById('description-align-group');
-        const descriptionWidthSlider = document.getElementById('description-width-slider'); // NEW
-        const descriptionWidthValue = document.getElementById('description-width-value'); // NEW
+        // Content Elements
+        const logoPreview = get('logo-preview');
+        const websitePreview = get('website-preview');
+        const glowingLine = get('glowing-line');
 
         // Tabs
-        const titleTabBtn = document.getElementById('title-tab-btn');
-        const descriptionTabBtn = document.getElementById('description-tab-btn');
-        const generalTabBtn = document.getElementById('general-tab-btn'); // UPDATED
-        const titlePane = document.getElementById('title-pane');
-        const descriptionPane = document.getElementById('description-pane');
-        const generalPane = document.getElementById('general-pane'); // UPDATED
+        const titleTabBtn = get('title-tab-btn');
+        const descriptionTabBtn = get('description-tab-btn');
+        const addElementTabBtn = get('add-element-tab-btn');
+        const generalTabBtn = get('general-tab-btn');
+        const titlePane = get('title-pane');
+        const descriptionPane = get('description-pane');
+        const addElementPane = get('add-element-pane');
+        const generalPane = get('general-pane');
 
-        // Toggles & Export
-        const glowToggle = document.getElementById('glow-toggle');
-        const animationToggle = document.getElementById('animation-toggle');
-        const exportBtn = document.getElementById('exportBtn');
-        const formatSelect = document.getElementById('format');
-        const qualitySelect = document.getElementById('quality');
+        // Title Controls
+        const titleInput = get('title-input');
+        const titleFontSelect = get('title-font-select');
+        const titleColorPicker = get('title-color-picker');
+        const titleSizeSlider = get('title-size-slider');
+        const titleSizeValue = get('title-size-value');
+        const titleWidthSlider = get('title-width-slider');
+        const titleWidthValue = get('title-width-value');
+        const titleAlignGroup = get('title-align-group');
+        const titleZindexInput = get('title-zindex-input');
+
+        // Description Controls
+        const descriptionInput = get('description-input');
+        const descriptionFontSelect = get('description-font-select');
+        const descriptionColorPicker = get('description-color-picker');
+        const descriptionSizeSlider = get('description-size-slider');
+        const descriptionSizeValue = get('description-size-value');
+        const descriptionWidthSlider = get('description-width-slider');
+        const descriptionWidthValue = get('description-width-value');
+        const descriptionAlignGroup = get('description-align-group');
+        const descriptionZindexInput = get('description-zindex-input');
+
+        // Custom Element Controls
+        const customIconUpload = get('custom-icon-upload');
+        const svgCodeInput = get('svg-code-input');
+        const addSvgBtn = get('add-svg-btn');
+        const elementEditorView = get('element-editor-view');
+        const elementColorPicker = get('element-color-picker');
+        const elementSizeSlider = get('element-size-slider');
+        const elementSizeValue = get('element-size-value');
+        const elementZindexInput = get('element-zindex-input');
+        const deleteElementBtn = get('delete-element-btn');
+        const deselectElementBtn = get('deselect-element-btn');
+        const editorColorControl = get('editor-color-control');
+        let selectedElement = null;
+
+        // General Controls
+        const sizePresetSelect = get('size-preset-select');
+        const customWidthInput = get('custom-width-input');
+        const customHeightInput = get('custom-height-input');
+        const logoUpload = get('logo-upload');
+        const logoSizeSlider = get('logo-size-slider');
+        const logoSizeValue = get('logo-size-value');
+        const logoZindexInput = get('logo-zindex-input');
+        const websiteInput = get('website-input');
+        const colorPicker = get('color-picker');
+        const bgColorTop = get('bg-color-top');
+        const bgColorBottom = get('bg-color-bottom');
+        const bgUpload = get('bg-upload');
+        const resetBgBtn = get('reset-bg-btn');
+        const glowToggle = get('glow-toggle');
+        const animationToggle = get('animation-toggle');
+
+        // Footer Controls
+        const websiteSizeSlider = get('website-size-slider');
+        const websiteSizeValue = get('website-size-value');
+        const websiteZindexInput = get('website-zindex-input');
+        const lineWidthSlider = get('line-width-slider');
+        const lineWidthValue = get('line-width-value');
+        const lineHeightSlider = get('line-height-slider');
+        const lineHeightValue = get('line-height-value');
+        const lineZindexInput = get('line-zindex-input');
+
+        // Export & State Buttons
+        const exportBtn = get('exportBtn');
+        const saveStateBtn = get('save-state-btn');
+        const resetStateBtn = get('reset-state-btn');
+        
+        // --- Data ---
+        const sizePresets = {
+            instagram_post: { width: 1080, height: 1080 },
+            instagram_story: { width: 1080, height: 1920 },
+            youtube_thumbnail: { width: 1280, height: 720 },
+            facebook_post: { width: 1200, height: 630 },
+        };
 
         // --- Functions ---
-
-        // Initialize input fields with current canvas values
-        function initializeInputs() {
-            titleInput.value = titlePreview.innerText.trim();
-            descriptionInput.value = descriptionPreview.innerText.trim();
-            websiteInput.value = websitePreview.innerText.trim();
-        }
-
-        // Handle tab switching
         function handleTabs(activeBtn) {
-            const buttons = [titleTabBtn, descriptionTabBtn, generalTabBtn];
-            const panes = [titlePane, descriptionPane, generalPane];
-            
-            buttons.forEach(btn => btn.classList.remove('active'));
-            panes.forEach(pane => pane.classList.remove('active'));
-
+            [titleTabBtn, descriptionTabBtn, addElementTabBtn, generalTabBtn].forEach(btn => btn.classList.remove('active'));
+            [titlePane, descriptionPane, addElementPane, generalPane].forEach(pane => pane.classList.remove('active'));
             activeBtn.classList.add('active');
-            // ** FIXED: Correctly replaces '-tab-btn' to find the pane ID **
             const targetPaneId = activeBtn.id.replace('-tab-btn', '-pane');
-            const targetPane = document.getElementById(targetPaneId);
-            if (targetPane) {
-                targetPane.classList.add('active');
-            }
+            get(targetPaneId).classList.add('active');
         }
         
-        // Make an element draggable within its container
         function makeDraggable(element) {
             let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
             element.onmousedown = dragMouseDown;
 
             function dragMouseDown(e) {
-                e = e || window.event;
                 e.preventDefault();
                 pos3 = e.clientX;
                 pos4 = e.clientY;
@@ -355,7 +496,6 @@
             }
 
             function elementDrag(e) {
-                e = e || window.event;
                 e.preventDefault();
                 pos1 = pos3 - e.clientX;
                 pos2 = pos4 - e.clientY;
@@ -370,73 +510,195 @@
                 document.onmousemove = null;
             }
         }
-
-        // --- Event Listeners ---
-
-        // Tabs
-        titleTabBtn.addEventListener('click', () => handleTabs(titleTabBtn));
-        descriptionTabBtn.addEventListener('click', () => handleTabs(descriptionTabBtn));
-        generalTabBtn.addEventListener('click', () => handleTabs(generalTabBtn));
-
-        // Text inputs
-        titleInput.addEventListener('input', (e) => { titlePreview.innerText = e.target.value; });
-        descriptionInput.addEventListener('input', (e) => { descriptionPreview.innerText = e.target.value; });
-        websiteInput.addEventListener('input', (e) => { websitePreview.innerText = e.target.value; });
-
-        // Color pickers
-        titleColorPicker.addEventListener('input', (e) => { titlePreview.style.color = e.target.value; });
-        descriptionColorPicker.addEventListener('input', (e) => { descriptionPreview.style.color = e.target.value; });
-        colorPicker.addEventListener('input', (e) => { document.documentElement.style.setProperty('--theme-color', e.target.value); });
         
-        // NEW: Background color listeners
-        const updateBackground = () => {
-            const topColor = bgColorTop.value;
-            const bottomColor = bgColorBottom.value;
-            captureElement.style.backgroundImage = `linear-gradient(to bottom, ${topColor}, ${bottomColor})`;
-            defaultBgElements.style.display = 'block'; // Ensure default shapes are visible with gradient
-        };
-        bgColorTop.addEventListener('input', updateBackground);
-        bgColorBottom.addEventListener('input', updateBackground);
+        function updateCanvasSize(width, height) {
+            const maxWidth = window.innerWidth * 0.9;
+            let displayWidth = width;
+            let displayHeight = height;
 
-        // Size sliders
-        titleSizeSlider.addEventListener('input', (e) => {
-            const newSize = e.target.value;
-            titlePreview.style.fontSize = `${newSize}px`;
-            titleSizeValue.innerText = newSize;
-        });
-        descriptionSizeSlider.addEventListener('input', (e) => {
-            const newSize = e.target.value;
-            descriptionPreview.style.fontSize = `${newSize}px`;
-            descriptionSizeValue.innerText = newSize;
-        });
+            if (width > maxWidth) {
+                const ratio = maxWidth / width;
+                displayWidth = maxWidth;
+                displayHeight = height * ratio;
+            }
+            
+            captureElement.style.width = `${displayWidth}px`;
+            captureElement.style.height = `${displayHeight}px`;
+            controlPanel.style.width = `${displayWidth}px`;
+            
+            captureElement.dataset.exportWidth = width;
+            captureElement.dataset.exportHeight = height;
+        }
 
-        // NEW: Width sliders
-        titleWidthSlider.addEventListener('input', (e) => {
-            const newWidth = e.target.value;
-            titlePreview.style.width = `${newWidth}px`;
-            titleWidthValue.innerText = newWidth;
-        });
-        descriptionWidthSlider.addEventListener('input', (e) => {
-            const newWidth = e.target.value;
-            descriptionPreview.style.width = `${newWidth}px`;
-            descriptionWidthValue.innerText = newWidth;
-        });
+        function createAndPlaceElement(options) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'draggable custom-element';
+            wrapper.dataset.type = options.type;
+            wrapper.style.position = 'absolute';
+            wrapper.style.top = options.top || '150px';
+            wrapper.style.left = options.left || '150px';
+            wrapper.style.width = options.width || '100px';
+            wrapper.style.zIndex = options.zIndex || 15;
+            
+            if (options.type === 'svg') {
+                wrapper.style.color = options.color || '#FFFFFF';
+                wrapper.innerHTML = options.content;
+                const svgEl = wrapper.querySelector('svg');
+                if(svgEl) {
+                    svgEl.setAttribute('width', '100%');
+                    svgEl.setAttribute('height', '100%');
+                }
+            } else {
+                wrapper.innerHTML = `<img src="${options.content}" class="w-full h-auto">`;
+            }
 
-        // Alignment buttons
+            makeDraggable(wrapper);
+            wrapper.addEventListener('click', (e) => {
+                e.stopPropagation();
+                selectElement(wrapper);
+            });
+            
+            captureElement.appendChild(wrapper);
+            if(options.select) selectElement(wrapper);
+        }
+
+        function selectElement(element) {
+            const currentSelected = document.querySelector('.selected-element');
+            if (currentSelected) {
+                currentSelected.classList.remove('selected-element');
+            }
+
+            if (element) {
+                element.classList.add('selected-element');
+                selectedElement = element;
+                elementEditorView.classList.remove('hidden');
+                
+                const size = parseInt(selectedElement.style.width, 10);
+                elementSizeSlider.value = size;
+                elementSizeValue.innerText = size;
+                elementZindexInput.value = selectedElement.style.zIndex;
+
+                if (selectedElement.dataset.type === 'svg') {
+                    editorColorControl.style.display = 'block';
+                    elementColorPicker.value = rgbToHex(selectedElement.style.color);
+                } else {
+                    editorColorControl.style.display = 'none';
+                }
+            } else {
+                selectedElement = null;
+                elementEditorView.classList.add('hidden');
+            }
+        }
+        
+        function rgbToHex(rgb) {
+            if (!rgb || !rgb.startsWith('rgb')) return '#ffffff';
+            let [r, g, b] = rgb.match(/\d+/g).map(Number);
+            return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
+        }
+        
         const setupAlignButtons = (group, element) => {
             group.addEventListener('click', (e) => {
                 if (e.target.tagName === 'BUTTON') {
-                    const alignment = e.target.dataset.align;
-                    element.style.textAlign = alignment;
+                    element.style.textAlign = e.target.dataset.align;
                     group.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
                     e.target.classList.add('active');
                 }
             });
         };
+        
+        function syncControlsFromCanvas() {
+            // Title
+            titleInput.value = titlePreview.innerText.trim();
+            titleColorPicker.value = rgbToHex(titlePreview.style.color);
+            const titleFontSize = parseInt(titlePreview.style.fontSize, 10) || 72;
+            titleSizeSlider.value = titleFontSize;
+            titleSizeValue.innerText = titleFontSize;
+            const titleWidth = parseInt(titlePreview.style.width, 10) || 720;
+            titleWidthSlider.value = titleWidth;
+            titleWidthValue.innerText = titleWidth;
+            titleZindexInput.value = titlePreview.style.zIndex;
+            const titleFont = titlePreview.style.fontFamily.split(',')[0].replace(/['"]/g, '').trim();
+            titleFontSelect.value = titleFont;
+            titleAlignGroup.querySelectorAll('button').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.align === titlePreview.style.textAlign);
+            });
+
+            // Description
+            descriptionInput.value = descriptionPreview.innerText.trim();
+            descriptionColorPicker.value = rgbToHex(descriptionPreview.style.color);
+            const descFontSize = parseInt(descriptionPreview.style.fontSize, 10) || 28;
+            descriptionSizeSlider.value = descFontSize;
+            descriptionSizeValue.innerText = descFontSize;
+            const descWidth = parseInt(descriptionPreview.style.width, 10) || 720;
+            descriptionWidthSlider.value = descWidth;
+            descriptionWidthValue.innerText = descWidth;
+            descriptionZindexInput.value = descriptionPreview.style.zIndex;
+            const descFont = descriptionPreview.style.fontFamily.split(',')[0].replace(/['"]/g, '').trim();
+            descriptionFontSelect.value = descFont;
+            descriptionAlignGroup.querySelectorAll('button').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.align === descriptionPreview.style.textAlign);
+            });
+
+            // Logo
+            const logoWidth = parseInt(logoWrapper.style.width, 10) || 110;
+            logoSizeSlider.value = logoWidth;
+            logoSizeValue.innerText = logoWidth;
+            logoZindexInput.value = logoWrapper.style.zIndex;
+
+            // Website
+            websiteInput.value = websitePreview.innerText.trim();
+            const websiteFontSize = parseInt(websitePreview.style.fontSize, 10) || 24;
+            websiteSizeSlider.value = websiteFontSize;
+            websiteSizeValue.innerText = websiteFontSize;
+            websiteZindexInput.value = websiteWrapper.style.zIndex;
+
+            // Line
+            const lineWidth = parseInt(glowingLine.style.width, 10) || 240;
+            lineWidthSlider.value = lineWidth;
+            lineWidthValue.innerText = lineWidth;
+            const lineHeight = parseInt(glowingLine.style.height, 10) || 8;
+            lineHeightSlider.value = lineHeight;
+            lineHeightValue.innerText = lineHeight;
+            lineZindexInput.value = lineWrapper.style.zIndex;
+        }
+
+        // --- Event Listeners ---
+        titleTabBtn.addEventListener('click', () => handleTabs(titleTabBtn));
+        descriptionTabBtn.addEventListener('click', () => handleTabs(descriptionTabBtn));
+        addElementTabBtn.addEventListener('click', () => handleTabs(addElementTabBtn));
+        generalTabBtn.addEventListener('click', () => handleTabs(generalTabBtn));
+
+        // Title Controls
+        titleInput.addEventListener('input', (e) => { titlePreview.innerText = e.target.value; });
+        titleFontSelect.addEventListener('input', (e) => { titlePreview.style.fontFamily = `'${e.target.value}', sans-serif`; });
+        titleColorPicker.addEventListener('input', (e) => { titlePreview.style.color = e.target.value; });
+        titleSizeSlider.addEventListener('input', (e) => {
+            titlePreview.style.fontSize = `${e.target.value}px`;
+            titleSizeValue.innerText = e.target.value;
+        });
+        titleWidthSlider.addEventListener('input', (e) => {
+            titlePreview.style.width = `${e.target.value}px`;
+            titleWidthValue.innerText = e.target.value;
+        });
+        titleZindexInput.addEventListener('input', (e) => { titlePreview.style.zIndex = e.target.value; });
         setupAlignButtons(titleAlignGroup, titlePreview);
+
+        // Description Controls
+        descriptionInput.addEventListener('input', (e) => { descriptionPreview.innerText = e.target.value; });
+        descriptionFontSelect.addEventListener('input', (e) => { descriptionPreview.style.fontFamily = `'${e.target.value}', sans-serif`; });
+        descriptionColorPicker.addEventListener('input', (e) => { descriptionPreview.style.color = e.target.value; });
+        descriptionSizeSlider.addEventListener('input', (e) => {
+            descriptionPreview.style.fontSize = `${e.target.value}px`;
+            descriptionSizeValue.innerText = e.target.value;
+        });
+        descriptionWidthSlider.addEventListener('input', (e) => {
+            descriptionPreview.style.width = `${e.target.value}px`;
+            descriptionWidthValue.innerText = e.target.value;
+        });
+        descriptionZindexInput.addEventListener('input', (e) => { descriptionPreview.style.zIndex = e.target.value; });
         setupAlignButtons(descriptionAlignGroup, descriptionPreview);
 
-        // File uploads
+        // Logo controls
         logoUpload.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
@@ -445,62 +707,270 @@
                 reader.readAsDataURL(file);
             }
         });
+        logoSizeSlider.addEventListener('input', (e) => {
+            logoWrapper.style.width = `${e.target.value}px`;
+            logoSizeValue.innerText = e.target.value;
+        });
+        logoZindexInput.addEventListener('input', (e) => { logoWrapper.style.zIndex = e.target.value; });
+
+        // Custom Element Controls
+        customIconUpload.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            const options = { type: file.type === 'image/svg+xml' ? 'svg' : 'png', select: true };
+            reader.onload = (ev) => {
+                options.content = ev.target.result;
+                createAndPlaceElement(options);
+            };
+            if (options.type === 'svg') reader.readAsText(file);
+            else reader.readAsDataURL(file);
+            e.target.value = '';
+        });
+
+        addSvgBtn.addEventListener('click', () => {
+            const code = svgCodeInput.value.trim();
+            if (code) {
+                createAndPlaceElement({ content: code, type: 'svg', select: true });
+                svgCodeInput.value = '';
+            }
+        });
+
+        elementColorPicker.addEventListener('input', (e) => {
+            if (selectedElement && selectedElement.dataset.type === 'svg') {
+                selectedElement.style.color = e.target.value;
+            }
+        });
+        elementSizeSlider.addEventListener('input', (e) => {
+            if (selectedElement) {
+                selectedElement.style.width = `${e.target.value}px`;
+                selectedElement.style.height = (selectedElement.dataset.type === 'png') ? 'auto' : `${e.target.value}px`;
+                elementSizeValue.innerText = e.target.value;
+            }
+        });
+        elementZindexInput.addEventListener('input', (e) => {
+            if(selectedElement) selectedElement.style.zIndex = e.target.value;
+        });
+        deleteElementBtn.addEventListener('click', () => {
+            if (selectedElement) {
+                selectedElement.remove();
+                selectElement(null);
+            }
+        });
+        deselectElementBtn.addEventListener('click', () => selectElement(null));
+        captureElement.addEventListener('click', (e) => {
+            if (e.target === captureElement) {
+                selectElement(null);
+            }
+        });
+
+        // General Settings
+        sizePresetSelect.addEventListener('input', (e) => {
+            const value = e.target.value;
+            if (value === 'custom') {
+                get('custom-size-inputs').style.display = 'grid';
+                updateCanvasSize(customWidthInput.value, customHeightInput.value);
+            } else {
+                get('custom-size-inputs').style.display = 'none';
+                const { width, height } = sizePresets[value];
+                customWidthInput.value = width;
+                customHeightInput.value = height;
+                updateCanvasSize(width, height);
+            }
+        });
+        customWidthInput.addEventListener('input', (e) => { updateCanvasSize(e.target.value, customHeightInput.value); });
+        customHeightInput.addEventListener('input', (e) => { updateCanvasSize(customWidthInput.value, e.target.value); });
+        websiteInput.addEventListener('input', (e) => { websitePreview.innerText = e.target.value; });
+        colorPicker.addEventListener('input', (e) => { document.documentElement.style.setProperty('--theme-color', e.target.value); });
         
+        bgColorTop.addEventListener('input', (e) => {
+            document.documentElement.style.setProperty('--bg-color-top', e.target.value);
+        });
+        bgColorBottom.addEventListener('input', (e) => {
+            document.documentElement.style.setProperty('--bg-color-bottom', e.target.value);
+        });
+
         bgUpload.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
                 reader.onload = (ev) => { 
                     captureElement.style.backgroundImage = `url('${ev.target.result}')`;
-                    defaultBgElements.style.display = 'none'; // Hide default elements
+                    get('default-bg-elements').style.display = 'none';
                 };
                 reader.readAsDataURL(file);
             }
         });
-
-        // Reset background button
+        
+        // FIXED: Reset background button now also resets colors
         resetBgBtn.addEventListener('click', () => {
-            // Reset to default gradient by removing inline style
             captureElement.style.backgroundImage = ''; 
-            // Reset color pickers to default values
-            bgColorTop.value = getComputedStyle(document.documentElement).getPropertyValue('--bg-color-top').trim();
-            bgColorBottom.value = getComputedStyle(document.documentElement).getPropertyValue('--bg-color-bottom').trim();
-            // Show default elements again
-            defaultBgElements.style.display = 'block'; 
-            // Clear the file input
+            get('default-bg-elements').style.display = 'block'; 
             bgUpload.value = '';
+
+            // Reset gradient colors to default
+            const defaultTopColor = '#1a202c';
+            const defaultBottomColor = '#2d3748';
+            bgColorTop.value = defaultTopColor;
+            bgColorBottom.value = defaultBottomColor;
+            document.documentElement.style.setProperty('--bg-color-top', defaultTopColor);
+            document.documentElement.style.setProperty('--bg-color-bottom', defaultBottomColor);
         });
+
+        // Footer Control Listeners
+        websiteSizeSlider.addEventListener('input', (e) => {
+            websitePreview.style.fontSize = `${e.target.value}px`;
+            websiteSizeValue.innerText = e.target.value;
+        });
+        websiteZindexInput.addEventListener('input', e => websiteWrapper.style.zIndex = e.target.value);
+        lineWidthSlider.addEventListener('input', (e) => {
+            glowingLine.style.width = `${e.target.value}px`;
+            lineWidthValue.innerText = e.target.value;
+        });
+        lineHeightSlider.addEventListener('input', (e) => {
+            glowingLine.style.height = `${e.target.value}px`;
+            lineHeightValue.innerText = e.target.value;
+        });
+        lineZindexInput.addEventListener('input', e => lineWrapper.style.zIndex = e.target.value);
 
         // Toggles
         glowToggle.addEventListener('change', () => { captureElement.classList.toggle('glow-active', glowToggle.checked); });
         animationToggle.addEventListener('change', () => { captureElement.classList.toggle('animation-active', animationToggle.checked); });
 
-        // Export button
-        exportBtn.addEventListener('click', () => {
-            const format = formatSelect.value;
-            const scale = parseInt(qualitySelect.value, 10);
-            if (document.activeElement) document.activeElement.blur(); // Remove focus from any element
+        // --- State Management ---
+        function saveState() {
+            const getElementState = (el) => ({
+                top: el.style.top,
+                left: el.style.left,
+                width: el.style.width,
+                height: el.style.height,
+                zIndex: el.style.zIndex,
+            });
+
+            const customElements = Array.from(document.querySelectorAll('.custom-element')).map(el => ({
+                ...getElementState(el),
+                type: el.dataset.type,
+                content: el.dataset.type === 'svg' ? el.innerHTML : el.querySelector('img').src,
+                color: el.style.color,
+            }));
+
+            const state = {
+                canvas: { width: captureElement.dataset.exportWidth, height: captureElement.dataset.exportHeight },
+                title: { ...getElementState(titlePreview), innerText: titlePreview.innerText, style: titlePreview.style.cssText },
+                description: { ...getElementState(descriptionPreview), innerText: descriptionPreview.innerText, style: descriptionPreview.style.cssText },
+                logo: { ...getElementState(logoWrapper), src: logoPreview.src },
+                website: { ...getElementState(websiteWrapper), innerText: websitePreview.innerText, style: websitePreview.style.cssText },
+                line: { ...getElementState(lineWrapper), style: glowingLine.style.cssText },
+                customElements,
+                controls: {
+                    themeColor: colorPicker.value,
+                    bgColorTop: bgColorTop.value,
+                    bgColorBottom: bgColorBottom.value,
+                    glow: glowToggle.checked,
+                    animation: animationToggle.checked,
+                    bgImage: captureElement.style.backgroundImage.includes('url') ? captureElement.style.backgroundImage : null,
+                }
+            };
+            localStorage.setItem('mastaarDesignerState', JSON.stringify(state));
+            alert('تم حفظ الإعدادات بنجاح!');
+        }
+
+        function loadState() {
+            const stateJSON = localStorage.getItem('mastaarDesignerState');
+            if (!stateJSON) {
+                syncControlsFromCanvas();
+                return;
+            }
+            const state = JSON.parse(stateJSON);
+
+            const restoreElement = (el, saved) => {
+                el.style.cssText = saved.style;
+                el.style.top = saved.top;
+                el.style.left = saved.left;
+                el.style.width = saved.width;
+                el.style.height = saved.height;
+                el.style.zIndex = saved.zIndex;
+                if(saved.innerText) el.innerText = saved.innerText;
+            };
+
+            restoreElement(titlePreview, state.title);
+            restoreElement(descriptionPreview, state.description);
+            restoreElement(logoWrapper, state.logo);
+            if(state.logo.src) logoPreview.src = state.logo.src;
+            restoreElement(websiteWrapper, state.website);
+            restoreElement(lineWrapper, state.line);
+            glowingLine.style.cssText = state.line.style;
+
+            document.querySelectorAll('.custom-element').forEach(el => el.remove());
+            state.customElements.forEach(elState => createAndPlaceElement({...elState, select: false}));
+
+            updateCanvasSize(state.canvas.width, state.canvas.height);
+            customWidthInput.value = state.canvas.width;
+            customHeightInput.value = state.canvas.height;
             
-            // Temporarily remove hover outline before capturing
-            const draggables = document.querySelectorAll('.draggable');
-            draggables.forEach(el => el.style.outline = 'none');
+            document.documentElement.style.setProperty('--theme-color', state.controls.themeColor);
+            colorPicker.value = state.controls.themeColor;
+            bgColorTop.value = state.controls.bgColorTop;
+            bgColorBottom.value = state.controls.bgColorBottom;
+            document.documentElement.style.setProperty('--bg-color-top', state.controls.bgColorTop);
+            document.documentElement.style.setProperty('--bg-color-bottom', state.controls.bgColorBottom);
 
-            html2canvas(captureElement, { scale, useCORS: true, backgroundColor: null, logging: false })
-                .then(canvas => {
-                    const link = document.createElement('a');
-                    link.download = `mastaar-design.${format}`;
-                    link.href = canvas.toDataURL(`image/${format}`, 1.0);
-                    link.click();
+            if(state.controls.bgImage) {
+                captureElement.style.backgroundImage = state.controls.bgImage;
+                get('default-bg-elements').style.display = 'none';
+            } else {
+                captureElement.style.backgroundImage = '';
+                get('default-bg-elements').style.display = 'block';
+            }
 
-                    // Restore hover outline style if needed, though it's handled by CSS :hover
-                    draggables.forEach(el => el.style.outline = '');
-                });
+            glowToggle.checked = state.controls.glow;
+            animationToggle.checked = state.controls.animation;
+            captureElement.classList.toggle('glow-active', glowToggle.checked);
+            captureElement.classList.toggle('animation-active', animationToggle.checked);
+            
+            syncControlsFromCanvas();
+        }
+
+        function resetState() {
+            if(confirm('هل أنت متأكد أنك تريد إعادة تعيين كل شيء؟ سيتم حذف جميع الإعدادات المحفوظة.')) {
+                localStorage.removeItem('mastaarDesignerState');
+                location.reload();
+            }
+        }
+        
+        saveStateBtn.addEventListener('click', saveState);
+        resetStateBtn.addEventListener('click', resetState);
+
+        exportBtn.addEventListener('click', () => {
+            selectElement(null);
+            const exportWidth = captureElement.dataset.exportWidth || 800;
+            const exportHeight = captureElement.dataset.exportHeight || 800;
+            const qualityScale = parseInt(get('quality').value, 10);
+            
+            if (document.activeElement) document.activeElement.blur();
+
+            html2canvas(captureElement, {
+                width: exportWidth,
+                height: exportHeight,
+                scale: qualityScale,
+                useCORS: true,
+                backgroundColor: null,
+                logging: false
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `mastaar-design.${get('format').value}`;
+                link.href = canvas.toDataURL(`image/${get('format').value}`, 1.0);
+                link.click();
+            });
         });
 
         // --- Initializations ---
-        initializeInputs();
         makeDraggable(titlePreview);
         makeDraggable(descriptionPreview);
+        makeDraggable(logoWrapper);
+        makeDraggable(lineWrapper);
+        makeDraggable(websiteWrapper);
+        loadState();
     });
     </script>
 
