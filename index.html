@@ -19,6 +19,9 @@
     <style>
         :root {
             --theme-color: #00A9E0;
+            /* NEW: Default background colors as CSS variables */
+            --bg-color-top: #1a202c;
+            --bg-color-bottom: #2d3748;
         }
         body {
             font-family: 'Tajawal', sans-serif;
@@ -27,7 +30,8 @@
         .canvas-container {
             width: 800px;
             height: 800px;
-            background-image: linear-gradient(to bottom, #1a202c, #2d3748);
+            /* UPDATED: Uses CSS variables now */
+            background-image: linear-gradient(to bottom, var(--bg-color-top), var(--bg-color-bottom));
             background-size: cover;
             background-position: center;
         }
@@ -104,7 +108,6 @@
         <!-- =================================== -->
         <div id="capture" class="canvas-container rounded-2xl overflow-hidden relative p-10 glow-active animation-active">
 
-            <!-- ** NEW: ID ADDED ** -->
             <div id="default-bg-elements" class="absolute inset-0 z-0">
                 <div class="animated-shape absolute -top-1/4 -right-1/4 w-3/4 h-3/4 bg-white/5 rounded-full"></div>
                 <div class="animated-shape absolute -bottom-1/4 -left-1/4 w-2/3 h-2/3 glass-effect rounded-full" style="animation-delay: -5s;"></div>
@@ -141,8 +144,10 @@
             <div class="flex border-b">
                 <button id="title-tab-btn" class="control-tab active flex-1 p-3 font-bold text-lg">تعديل العنوان</button>
                 <button id="description-tab-btn" class="control-tab flex-1 p-3 font-bold text-lg">تعديل الوصف</button>
+                 <button id="general-tab-btn" class="control-tab flex-1 p-3 font-bold text-lg">إعدادات عامة</button>
             </div>
 
+            <!-- Title Pane -->
             <div id="title-pane" class="control-pane active space-y-4">
                 <input type="text" id="title-input" placeholder="العنوان الرئيسي" class="w-full p-2 border border-gray-300 rounded-md">
                 <div class="grid grid-cols-2 gap-4">
@@ -155,6 +160,11 @@
                         <input type="range" id="title-size-slider" min="30" max="120" value="72" class="w-full">
                     </div>
                 </div>
+                <!-- NEW: Title Width Slider -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">عرض حقل العنوان: <span id="title-width-value">720</span>px</label>
+                    <input type="range" id="title-width-slider" min="200" max="780" value="720" class="w-full">
+                </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">محاذاة العنوان</label>
                     <div id="title-align-group" class="control-btn-group w-full flex rounded-md shadow-sm">
@@ -165,6 +175,7 @@
                 </div>
             </div>
 
+            <!-- Description Pane -->
             <div id="description-pane" class="control-pane space-y-4">
                 <textarea id="description-input" rows="3" placeholder="الوصف" class="w-full p-2 border border-gray-300 rounded-md"></textarea>
                 <div class="grid grid-cols-2 gap-4">
@@ -177,6 +188,11 @@
                         <input type="range" id="description-size-slider" min="14" max="50" value="28" class="w-full">
                     </div>
                 </div>
+                <!-- NEW: Description Width Slider -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">عرض حقل الوصف: <span id="description-width-value">720</span>px</label>
+                    <input type="range" id="description-width-slider" min="200" max="780" value="720" class="w-full">
+                </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">محاذاة الوصف</label>
                     <div id="description-align-group" class="control-btn-group w-full flex rounded-md shadow-sm">
@@ -187,33 +203,41 @@
                 </div>
             </div>
 
-            <hr/>
-            
-             <div class="space-y-4">
-                <h3 class="font-bold text-lg">إعدادات عامة</h3>
-                <input type="text" id="website-input" placeholder="رابط الموقع" class="w-full p-2 border border-gray-300 rounded-md">
-                <div class="grid grid-cols-2 gap-4">
+            <!-- General Settings Pane -->
+            <div id="general-pane" class="control-pane space-y-4">
+                 <input type="text" id="website-input" placeholder="رابط الموقع" class="w-full p-2 border border-gray-300 rounded-md">
+                 <div class="grid grid-cols-2 gap-4">
                      <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">رفع الشعار</label>
-                        <input type="file" id="logo-upload" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                         <label class="block text-sm font-medium text-gray-700 mb-1">رفع الشعار</label>
+                         <input type="file" id="logo-upload" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                     </div>
+                     <div>
+                         <label class="block text-sm font-medium text-gray-700 mb-1">اللون الأساسي (للتوهج)</label>
+                         <input type="color" id="color-picker" value="#00A9E0" class="w-full h-10 p-1 border border-gray-300 rounded-md cursor-pointer">
+                     </div>
+                 </div>
+                 <!-- NEW: Background Color Pickers -->
+                 <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">لون الخلفية (علوي)</label>
+                        <input type="color" id="bg-color-top" value="#1a202c" class="w-full h-10 p-1 border border-gray-300 rounded-md cursor-pointer">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">اللون الأساسي (للتوهج)</label>
-                        <input type="color" id="color-picker" value="#00A9E0" class="w-full h-10 p-1 border border-gray-300 rounded-md cursor-pointer">
+                        <label class="block text-sm font-medium text-gray-700">لون الخلفية (سفلي)</label>
+                        <input type="color" id="bg-color-bottom" value="#2d3748" class="w-full h-10 p-1 border border-gray-300 rounded-md cursor-pointer">
                     </div>
                 </div>
-                <!-- ** NEW: LAYOUT CHANGED & BUTTON ADDED ** -->
-                <div class="flex items-end gap-4">
-                    <div class="flex-grow">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">رفع صورة خلفية</label>
-                        <input type="file" id="bg-upload" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-50 file:text-gray-700 hover:file:bg-gray-100">
-                    </div>
-                    <button id="reset-bg-btn" class="px-3 py-2 text-sm bg-gray-200 rounded-md hover:bg-gray-300 whitespace-nowrap">إعادة تعيين</button>
-                </div>
-                 <div class="flex justify-around">
-                    <label for="glow-toggle" class="flex items-center gap-3 cursor-pointer"><span class="font-medium">تفعيل التوهج</span><input type="checkbox" id="glow-toggle" class="sr-only" checked><div class="toggle-switch"></div></label>
-                    <label for="animation-toggle" class="flex items-center gap-3 cursor-pointer"><span class="font-medium">تفعيل الحركة</span><input type="checkbox" id="animation-toggle" class="sr-only" checked><div class="toggle-switch"></div></label>
-                </div>
+                 <div class="flex items-end gap-4">
+                     <div class="flex-grow">
+                         <label class="block text-sm font-medium text-gray-700 mb-1">رفع صورة خلفية</label>
+                         <input type="file" id="bg-upload" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-50 file:text-gray-700 hover:file:bg-gray-100">
+                     </div>
+                     <button id="reset-bg-btn" class="px-3 py-2 text-sm bg-gray-200 rounded-md hover:bg-gray-300 whitespace-nowrap">إعادة تعيين الخلفية</button>
+                 </div>
+                  <div class="flex justify-around pt-2">
+                      <label for="glow-toggle" class="flex items-center gap-3 cursor-pointer"><span class="font-medium">تفعيل التوهج</span><input type="checkbox" id="glow-toggle" class="sr-only" checked><div class="toggle-switch"></div></label>
+                      <label for="animation-toggle" class="flex items-center gap-3 cursor-pointer"><span class="font-medium">تفعيل الحركة</span><input type="checkbox" id="animation-toggle" class="sr-only" checked><div class="toggle-switch"></div></label>
+                  </div>
             </div>
 
             <hr/>
@@ -236,99 +260,87 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
+        // --- Get Elements ---
         const captureElement = document.getElementById('capture');
-        const defaultBgElements = document.getElementById('default-bg-elements'); // ** NEW **
+        const defaultBgElements = document.getElementById('default-bg-elements');
         
+        // Canvas elements
         const titlePreview = document.getElementById('title-preview');
         const descriptionPreview = document.getElementById('description-preview');
         const websitePreview = document.getElementById('website-preview');
         const logoPreview = document.getElementById('logo-preview');
         
+        // Input elements
         const titleInput = document.getElementById('title-input');
         const descriptionInput = document.getElementById('description-input');
         const websiteInput = document.getElementById('website-input');
         const logoUpload = document.getElementById('logo-upload');
         const bgUpload = document.getElementById('bg-upload');
-        const resetBgBtn = document.getElementById('reset-bg-btn'); // ** NEW **
+        const resetBgBtn = document.getElementById('reset-bg-btn');
         const colorPicker = document.getElementById('color-picker');
         
+        // NEW: Background color pickers
+        const bgColorTop = document.getElementById('bg-color-top');
+        const bgColorBottom = document.getElementById('bg-color-bottom');
+
+        // Title controls
         const titleColorPicker = document.getElementById('title-color-picker');
         const titleSizeSlider = document.getElementById('title-size-slider');
         const titleSizeValue = document.getElementById('title-size-value');
         const titleAlignGroup = document.getElementById('title-align-group');
+        const titleWidthSlider = document.getElementById('title-width-slider'); // NEW
+        const titleWidthValue = document.getElementById('title-width-value'); // NEW
         
+        // Description controls
         const descriptionColorPicker = document.getElementById('description-color-picker');
         const descriptionSizeSlider = document.getElementById('description-size-slider');
         const descriptionSizeValue = document.getElementById('description-size-value');
         const descriptionAlignGroup = document.getElementById('description-align-group');
-        
+        const descriptionWidthSlider = document.getElementById('description-width-slider'); // NEW
+        const descriptionWidthValue = document.getElementById('description-width-value'); // NEW
+
+        // Tabs
         const titleTabBtn = document.getElementById('title-tab-btn');
         const descriptionTabBtn = document.getElementById('description-tab-btn');
+        const generalTabBtn = document.getElementById('general-tab-btn'); // UPDATED
         const titlePane = document.getElementById('title-pane');
         const descriptionPane = document.getElementById('description-pane');
+        const generalPane = document.getElementById('general-pane'); // UPDATED
 
+        // Toggles & Export
         const glowToggle = document.getElementById('glow-toggle');
         const animationToggle = document.getElementById('animation-toggle');
-
         const exportBtn = document.getElementById('exportBtn');
         const formatSelect = document.getElementById('format');
         const qualitySelect = document.getElementById('quality');
 
+        // --- Functions ---
+
+        // Initialize input fields with current canvas values
         function initializeInputs() {
-            titleInput.value = titlePreview.innerText;
-            descriptionInput.value = descriptionPreview.innerText;
-            websiteInput.value = websitePreview.innerText;
+            titleInput.value = titlePreview.innerText.trim();
+            descriptionInput.value = descriptionPreview.innerText.trim();
+            websiteInput.value = websitePreview.innerText.trim();
         }
-        initializeInputs();
 
-        titleTabBtn.addEventListener('click', () => {
-            titleTabBtn.classList.add('active');
-            descriptionTabBtn.classList.remove('active');
-            titlePane.classList.add('active');
-            descriptionPane.classList.remove('active');
-        });
-        descriptionTabBtn.addEventListener('click', () => {
-            descriptionTabBtn.classList.add('active');
-            titleTabBtn.classList.remove('active');
-            descriptionPane.classList.add('active');
-            titlePane.classList.remove('active');
-        });
+        // Handle tab switching
+        function handleTabs(activeBtn) {
+            const buttons = [titleTabBtn, descriptionTabBtn, generalTabBtn];
+            const panes = [titlePane, descriptionPane, generalPane];
+            
+            buttons.forEach(btn => btn.classList.remove('active'));
+            panes.forEach(pane => pane.classList.remove('active'));
 
-        titleInput.addEventListener('input', (e) => { titlePreview.innerText = e.target.value; });
-        descriptionInput.addEventListener('input', (e) => { descriptionPreview.innerText = e.target.value; });
-        websiteInput.addEventListener('input', (e) => { websitePreview.innerText = e.target.value; });
-
-        titleColorPicker.addEventListener('input', (e) => { titlePreview.style.color = e.target.value; });
-        descriptionColorPicker.addEventListener('input', (e) => { descriptionPreview.style.color = e.target.value; });
-
-        titleSizeSlider.addEventListener('input', (e) => {
-            const newSize = e.target.value;
-            titlePreview.style.fontSize = `${newSize}px`;
-            titleSizeValue.innerText = newSize;
-        });
-        descriptionSizeSlider.addEventListener('input', (e) => {
-            const newSize = e.target.value;
-            descriptionPreview.style.fontSize = `${newSize}px`;
-            descriptionSizeValue.innerText = newSize;
-        });
-
-        titleAlignGroup.addEventListener('click', (e) => {
-            if (e.target.tagName === 'BUTTON') {
-                const alignment = e.target.dataset.align;
-                titlePreview.style.textAlign = alignment;
-                titleAlignGroup.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
-                e.target.classList.add('active');
+            activeBtn.classList.add('active');
+            // ** FIXED: Correctly replaces '-tab-btn' to find the pane ID **
+            const targetPaneId = activeBtn.id.replace('-tab-btn', '-pane');
+            const targetPane = document.getElementById(targetPaneId);
+            if (targetPane) {
+                targetPane.classList.add('active');
             }
-        });
-        descriptionAlignGroup.addEventListener('click', (e) => {
-            if (e.target.tagName === 'BUTTON') {
-                const alignment = e.target.dataset.align;
-                descriptionPreview.style.textAlign = alignment;
-                descriptionAlignGroup.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
-                e.target.classList.add('active');
-            }
-        });
-
+        }
+        
+        // Make an element draggable within its container
         function makeDraggable(element) {
             let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
             element.onmousedown = dragMouseDown;
@@ -358,9 +370,73 @@
                 document.onmousemove = null;
             }
         }
-        makeDraggable(titlePreview);
-        makeDraggable(descriptionPreview);
+
+        // --- Event Listeners ---
+
+        // Tabs
+        titleTabBtn.addEventListener('click', () => handleTabs(titleTabBtn));
+        descriptionTabBtn.addEventListener('click', () => handleTabs(descriptionTabBtn));
+        generalTabBtn.addEventListener('click', () => handleTabs(generalTabBtn));
+
+        // Text inputs
+        titleInput.addEventListener('input', (e) => { titlePreview.innerText = e.target.value; });
+        descriptionInput.addEventListener('input', (e) => { descriptionPreview.innerText = e.target.value; });
+        websiteInput.addEventListener('input', (e) => { websitePreview.innerText = e.target.value; });
+
+        // Color pickers
+        titleColorPicker.addEventListener('input', (e) => { titlePreview.style.color = e.target.value; });
+        descriptionColorPicker.addEventListener('input', (e) => { descriptionPreview.style.color = e.target.value; });
+        colorPicker.addEventListener('input', (e) => { document.documentElement.style.setProperty('--theme-color', e.target.value); });
         
+        // NEW: Background color listeners
+        const updateBackground = () => {
+            const topColor = bgColorTop.value;
+            const bottomColor = bgColorBottom.value;
+            captureElement.style.backgroundImage = `linear-gradient(to bottom, ${topColor}, ${bottomColor})`;
+            defaultBgElements.style.display = 'block'; // Ensure default shapes are visible with gradient
+        };
+        bgColorTop.addEventListener('input', updateBackground);
+        bgColorBottom.addEventListener('input', updateBackground);
+
+        // Size sliders
+        titleSizeSlider.addEventListener('input', (e) => {
+            const newSize = e.target.value;
+            titlePreview.style.fontSize = `${newSize}px`;
+            titleSizeValue.innerText = newSize;
+        });
+        descriptionSizeSlider.addEventListener('input', (e) => {
+            const newSize = e.target.value;
+            descriptionPreview.style.fontSize = `${newSize}px`;
+            descriptionSizeValue.innerText = newSize;
+        });
+
+        // NEW: Width sliders
+        titleWidthSlider.addEventListener('input', (e) => {
+            const newWidth = e.target.value;
+            titlePreview.style.width = `${newWidth}px`;
+            titleWidthValue.innerText = newWidth;
+        });
+        descriptionWidthSlider.addEventListener('input', (e) => {
+            const newWidth = e.target.value;
+            descriptionPreview.style.width = `${newWidth}px`;
+            descriptionWidthValue.innerText = newWidth;
+        });
+
+        // Alignment buttons
+        const setupAlignButtons = (group, element) => {
+            group.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON') {
+                    const alignment = e.target.dataset.align;
+                    element.style.textAlign = alignment;
+                    group.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+                    e.target.classList.add('active');
+                }
+            });
+        };
+        setupAlignButtons(titleAlignGroup, titlePreview);
+        setupAlignButtons(descriptionAlignGroup, descriptionPreview);
+
+        // File uploads
         logoUpload.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
@@ -370,7 +446,6 @@
             }
         });
         
-        // ** UPDATED LOGIC **
         bgUpload.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
@@ -383,31 +458,49 @@
             }
         });
 
-        // ** NEW LOGIC **
+        // Reset background button
         resetBgBtn.addEventListener('click', () => {
-            captureElement.style.backgroundImage = ''; // Remove uploaded image, CSS gradient will show
-            defaultBgElements.style.display = 'block'; // Show default elements again
+            // Reset to default gradient by removing inline style
+            captureElement.style.backgroundImage = ''; 
+            // Reset color pickers to default values
+            bgColorTop.value = getComputedStyle(document.documentElement).getPropertyValue('--bg-color-top').trim();
+            bgColorBottom.value = getComputedStyle(document.documentElement).getPropertyValue('--bg-color-bottom').trim();
+            // Show default elements again
+            defaultBgElements.style.display = 'block'; 
+            // Clear the file input
+            bgUpload.value = '';
         });
 
-        colorPicker.addEventListener('input', (e) => {
-            document.documentElement.style.setProperty('--theme-color', e.target.value);
-        });
-
+        // Toggles
         glowToggle.addEventListener('change', () => { captureElement.classList.toggle('glow-active', glowToggle.checked); });
         animationToggle.addEventListener('change', () => { captureElement.classList.toggle('animation-active', animationToggle.checked); });
 
+        // Export button
         exportBtn.addEventListener('click', () => {
             const format = formatSelect.value;
             const scale = parseInt(qualitySelect.value, 10);
-            if (document.activeElement) document.activeElement.blur();
+            if (document.activeElement) document.activeElement.blur(); // Remove focus from any element
+            
+            // Temporarily remove hover outline before capturing
+            const draggables = document.querySelectorAll('.draggable');
+            draggables.forEach(el => el.style.outline = 'none');
+
             html2canvas(captureElement, { scale, useCORS: true, backgroundColor: null, logging: false })
                 .then(canvas => {
                     const link = document.createElement('a');
                     link.download = `mastaar-design.${format}`;
                     link.href = canvas.toDataURL(`image/${format}`, 1.0);
                     link.click();
+
+                    // Restore hover outline style if needed, though it's handled by CSS :hover
+                    draggables.forEach(el => el.style.outline = '');
                 });
         });
+
+        // --- Initializations ---
+        initializeInputs();
+        makeDraggable(titlePreview);
+        makeDraggable(descriptionPreview);
     });
     </script>
 
