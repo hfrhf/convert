@@ -122,7 +122,7 @@
                 </div>
                 <div id="website-wrapper" class="draggable" style="top: 710px; left: 445px; z-index: 20;">
                     <div class="flex items-center justify-end gap-3">
-                        <span id="website-preview" class="text-white font-bold tracking-wider" style="font-size: 24px;">www.mastaar.com</span>
+                        <span id="website-preview" class="text-white font-bold tracking-wider" style="font-size: 24px; color: rgb(255, 255, 255);">www.mastaar.com</span>
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
                     </div>
                 </div>
@@ -306,6 +306,10 @@
                             <input type="number" id="website-zindex-input" value="20" class="w-full p-2 border border-gray-300 rounded-md">
                         </div>
                     </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">لون الرابط</label>
+                        <input type="color" id="website-color-picker" value="#FFFFFF" class="w-full h-10 p-1 border border-gray-300 rounded-md cursor-pointer">
+                    </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700">عرض الشريط: <span id="line-width-value">240</span>px</label>
@@ -455,6 +459,7 @@
         const websiteSizeSlider = get('website-size-slider');
         const websiteSizeValue = get('website-size-value');
         const websiteZindexInput = get('website-zindex-input');
+        const websiteColorPicker = get('website-color-picker');
         const lineWidthSlider = get('line-width-slider');
         const lineWidthValue = get('line-width-value');
         const lineHeightSlider = get('line-height-slider');
@@ -651,6 +656,7 @@
             websiteSizeSlider.value = websiteFontSize;
             websiteSizeValue.innerText = websiteFontSize;
             websiteZindexInput.value = websiteWrapper.style.zIndex;
+            websiteColorPicker.value = rgbToHex(websitePreview.style.color);
 
             // Line
             const lineWidth = parseInt(glowingLine.style.width, 10) || 240;
@@ -802,13 +808,11 @@
             }
         });
         
-        // FIXED: Reset background button now also resets colors
         resetBgBtn.addEventListener('click', () => {
             captureElement.style.backgroundImage = ''; 
             get('default-bg-elements').style.display = 'block'; 
             bgUpload.value = '';
 
-            // Reset gradient colors to default
             const defaultTopColor = '#1a202c';
             const defaultBottomColor = '#2d3748';
             bgColorTop.value = defaultTopColor;
@@ -823,6 +827,7 @@
             websiteSizeValue.innerText = e.target.value;
         });
         websiteZindexInput.addEventListener('input', e => websiteWrapper.style.zIndex = e.target.value);
+        websiteColorPicker.addEventListener('input', e => websitePreview.style.color = e.target.value); 
         lineWidthSlider.addEventListener('input', (e) => {
             glowingLine.style.width = `${e.target.value}px`;
             lineWidthValue.innerText = e.target.value;
@@ -871,20 +876,26 @@
                     bgImage: captureElement.style.backgroundImage.includes('url') ? captureElement.style.backgroundImage : null,
                 }
             };
-            localStorage.setItem('mastaarDesignerState', JSON.stringify(state));
-            alert('تم حفظ الإعدادات بنجاح!');
+            try {
+                localStorage.setItem('mastaarDesignerState', JSON.stringify(state));
+                alert('تم حفظ الإعدادات بنجاح!');
+            } catch (e) {
+                alert('فشل حفظ الإعدادات. قد تكون مساحة التخزين ممتلئة (بسبب صورة كبيرة مثلاً).');
+            }
         }
 
         function loadState() {
             const stateJSON = localStorage.getItem('mastaarDesignerState');
             if (!stateJSON) {
+                // FIXED: Initialize canvas size from HTML values when no state is saved
+                updateCanvasSize(customWidthInput.value, customHeightInput.value);
                 syncControlsFromCanvas();
                 return;
             }
             const state = JSON.parse(stateJSON);
 
             const restoreElement = (el, saved) => {
-                el.style.cssText = saved.style;
+                if(saved.style) el.style.cssText = saved.style;
                 el.style.top = saved.top;
                 el.style.left = saved.left;
                 el.style.width = saved.width;
@@ -898,6 +909,8 @@
             restoreElement(logoWrapper, state.logo);
             if(state.logo.src) logoPreview.src = state.logo.src;
             restoreElement(websiteWrapper, state.website);
+            if(state.website.style) websitePreview.style.cssText = state.website.style;
+            
             restoreElement(lineWrapper, state.line);
             glowingLine.style.cssText = state.line.style;
 
