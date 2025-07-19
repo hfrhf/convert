@@ -216,7 +216,7 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">الحجم الأساسي: <span id="title-size-value">72</span>px</label>
-                            <input type="range" id="title-size-slider" min="30" max="150" value="72" class="w-full">
+                            <input type="range" id="title-size-slider" min="0" max="150" value="72" class="w-full">
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
@@ -277,7 +277,7 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">الحجم الأساسي: <span id="description-size-value">28</span>px</label>
-                            <input type="range" id="description-size-slider" min="14" max="80" value="28" class="w-full">
+                            <input type="range" id="description-size-slider" min="0" max="80" value="28" class="w-full">
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
@@ -723,15 +723,29 @@
             const selection = window.getSelection();
             if (!selection.rangeCount || selection.isCollapsed) return;
 
-            const range = selection.getRangeAt(0);
-            const span = document.createElement('span');
-            span.style[style] = value;
-            
-            try {
-                range.surroundContents(span);
-            } catch (e) {
-                console.error("Could not apply style, selection might be complex.", e);
+            document.execCommand('styleWithCSS', false, true);
+            if (style === 'fontSize') {
+                document.execCommand('fontSize', false, '1');
+                Array.from(document.querySelectorAll("font[size='1']")).forEach(el => {
+                    const span = document.createElement('span');
+                    span.style.fontSize = value;
+                    span.innerHTML = el.innerHTML;
+                    el.parentNode.replaceChild(span, el);
+                });
+            } else if (style === 'fontWeight') {
+                 document.execCommand('bold');
+                 // The bold command might create <b> tags, let's find them and apply weight
+                 const parent = selection.getRangeAt(0).commonAncestorContainer;
+                 parent.querySelectorAll('b').forEach(b => {
+                    const span = document.createElement('span');
+                    span.style.fontWeight = value;
+                    span.innerHTML = b.innerHTML;
+                    b.parentNode.replaceChild(span, b);
+                 });
+            } else {
+                document.execCommand(style, false, value);
             }
+            document.execCommand('styleWithCSS', false, false);
         }
 
         function syncControlsFromCanvas() {
@@ -817,7 +831,7 @@
         });
         titleSelectionWeightSlider.addEventListener('input', (e) => {
             const weight = e.target.value;
-            const weightMap = { '400': 'عادي', '500': 'عادي', '600': 'عريض', '700': 'عريض', '800': 'أعرض', '900': 'أعرض' };
+            const weightMap = { '400': 'عادي', '700': 'عريض', '900': 'أعرض' };
             titleSelectionWeightValue.innerText = weightMap[weight] || 'عادي';
             applyStyleToSelection('fontWeight', weight);
         });
@@ -845,7 +859,7 @@
         });
         descriptionSelectionWeightSlider.addEventListener('input', (e) => {
             const weight = e.target.value;
-            const weightMap = { '400': 'عادي', '500': 'عادي', '600': 'عريض', '700': 'عريض', '800': 'أعرض', '900': 'أعرض' };
+            const weightMap = { '400': 'عادي', '700': 'عريض', '900': 'أعرض' };
             descriptionSelectionWeightValue.innerText = weightMap[weight] || 'عادي';
             applyStyleToSelection('fontWeight', weight);
         });
