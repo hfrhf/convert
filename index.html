@@ -139,7 +139,7 @@
             </div>
             <div id="logo-wrapper" class="draggable" style="top: 40px; left: 650px; width: 110px; z-index: 20;">
                 <div class="glass-effect inline-block rounded-lg p-2">
-                    <img id="logo-preview" src="https://i.imgur.com/8Q9g2f2.jpeg" alt="شعار الشركة" class="h-auto w-full">
+                    <img id="logo-preview" src="https://i.imgur.com/8Q9g2f2.jpeg" alt="شعار الشركة" class="h-auto w-full" onerror="this.onerror=null;this.src='https://placehold.co/100x100/cccccc/ffffff?text=Logo';">
                 </div>
             </div>
             <div id="title-wrapper" class="draggable" style="top: 300px; left: 40px; width: 720px; z-index: 10;">
@@ -253,13 +253,13 @@
                             </div>
                         </div>
                          <div>
-                           <label class="block text-sm font-medium text-gray-700">الحجم: <span id="description-selection-size-value"></span>px</label>
-                           <input type="range" id="description-selection-size-slider" min="10" max="150" class="w-full">
-                        </div>
+                            <label class="block text-sm font-medium text-gray-700">الحجم: <span id="description-selection-size-value"></span>px</label>
+                            <input type="range" id="description-selection-size-slider" min="10" max="150" class="w-full">
+                         </div>
                     </div>
                     <div>
-                       <label class="block text-sm font-medium text-gray-700">وزن الخط: <span id="description-selection-weight-value">عادي</span></label>
-                       <input type="range" id="description-selection-weight-slider" min="400" max="900" step="100" value="400" class="w-full">
+                        <label class="block text-sm font-medium text-gray-700">وزن الخط: <span id="description-selection-weight-value">عادي</span></label>
+                        <input type="range" id="description-selection-weight-slider" min="400" max="900" step="100" value="400" class="w-full">
                     </div>
                 </div>
                 <div class="p-4 border rounded-lg space-y-3">
@@ -459,8 +459,18 @@
         </div>
     </div>
 
+    <!-- Custom Modal -->
+    <div id="custom-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center transition-opacity">
+        <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-md mx-4 transform transition-all scale-95">
+            <p id="modal-message" class="text-lg mb-6 text-gray-800"></p>
+            <div id="modal-buttons" class="flex justify-end gap-4">
+                <!-- Buttons will be injected here by JS -->
+            </div>
+        </div>
+    </div>
+
     <script>
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
         // --- Get Elements ---
         const get = (id) => document.getElementById(id);
         const captureElement = get('capture');
@@ -582,6 +592,87 @@
         let lastCustomWidth = 800;
         let lastCustomHeight = 800;
 
+        // --- IndexedDB Helper ---
+        const db = {
+            _db: null,
+            _dbName: 'MastaarDesignerDB',
+            _storeName: 'designerStateStore',
+            init() {
+                return new Promise((resolve, reject) => {
+                    // Incrementing DB version to 2 to force onupgradeneeded event
+                    const request = indexedDB.open(this._dbName, 2);
+                    request.onerror = (event) => reject("IndexedDB error: " + event.target.errorCode);
+                    request.onsuccess = (event) => {
+                        this._db = event.target.result;
+                        resolve(this);
+                    };
+                    request.onupgradeneeded = (event) => {
+                        console.log('Upgrading IndexedDB...');
+                        const db = event.target.result;
+                        if (!db.objectStoreNames.contains(this._storeName)) {
+                            console.log(`Creating object store: ${this._storeName}`);
+                            db.createObjectStore(this._storeName);
+                        }
+                    };
+                });
+            },
+            get(key) {
+                return new Promise((resolve, reject) => {
+                    const transaction = this._db.transaction([this._storeName], "readonly");
+                    const store = transaction.objectStore(this._storeName);
+                    const request = store.get(key);
+                    request.onerror = (event) => reject("Error getting data: " + event.target.errorCode);
+                    request.onsuccess = (event) => resolve(event.target.result);
+                });
+            },
+            set(key, value) {
+                return new Promise((resolve, reject) => {
+                    const transaction = this._db.transaction([this._storeName], "readwrite");
+                    const store = transaction.objectStore(this._storeName);
+                    const request = store.put(value, key);
+                    request.onerror = (event) => reject("Error setting data: " + event.target.errorCode);
+                    request.onsuccess = (event) => resolve(event.target.result);
+                });
+            },
+            clear() {
+                return new Promise((resolve, reject) => {
+                    const transaction = this._db.transaction([this._storeName], "readwrite");
+                    const store = transaction.objectStore(this._storeName);
+                    const request = store.clear();
+                    request.onerror = (event) => reject("Error clearing store: " + event.target.errorCode);
+                    request.onsuccess = (event) => resolve();
+                });
+            }
+        };
+        const dbInstance = await db.init();
+
+        // --- Custom Modal ---
+        const customModal = get('custom-modal');
+        const modalMessage = get('modal-message');
+        const modalButtons = get('modal-buttons');
+
+        function showModal(message, buttons = [{ text: 'موافق', type: 'confirm' }]) {
+            modalMessage.innerText = message;
+            modalButtons.innerHTML = ''; // Clear previous buttons
+
+            return new Promise(resolve => {
+                buttons.forEach(btnInfo => {
+                    const button = document.createElement('button');
+                    button.innerText = btnInfo.text;
+                    button.className = btnInfo.type === 'cancel'
+                        ? 'px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition-colors'
+                        : 'px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors';
+                    button.onclick = () => {
+                        customModal.classList.add('hidden');
+                        resolve(btnInfo.type);
+                    };
+                    modalButtons.appendChild(button);
+                });
+                customModal.classList.remove('hidden');
+                customModal.classList.add('flex');
+            });
+        }
+
         // --- Functions ---
         function handleTabs(activeBtn) {
             [titleTabBtn, descriptionTabBtn, addElementTabBtn, generalTabBtn].forEach(btn => btn.classList.remove('active'));
@@ -596,7 +687,7 @@
             element.onmousedown = dragMouseDown;
 
             function dragMouseDown(e) {
-                if (element.classList.contains('is-editing')) {
+                if (element.classList.contains('is-editing') || e.target.closest('.edit-btn')) {
                     return;
                 }
                 e.preventDefault();
@@ -660,7 +751,7 @@
                     svgEl.setAttribute('height', '100%');
                 }
             } else {
-                wrapper.innerHTML = `<img src="${options.content}" class="w-full h-auto">`;
+                wrapper.innerHTML = `<img src="${options.content}" class="w-full h-auto" onerror="this.onerror=null;this.src='https://placehold.co/100x100/cccccc/ffffff?text=Error';">`;
             }
 
             makeDraggable(wrapper);
@@ -736,7 +827,7 @@
                  document.execCommand('bold');
                  // The bold command might create <b> tags, let's find them and apply weight
                  const parent = selection.getRangeAt(0).commonAncestorContainer;
-                 parent.querySelectorAll('b').forEach(b => {
+                 (parent.nodeType === 1 ? parent : parent.parentNode).querySelectorAll('b').forEach(b => {
                     const span = document.createElement('span');
                     span.style.fontWeight = value;
                     span.innerHTML = b.innerHTML;
@@ -1030,7 +1121,7 @@
         animationToggle.addEventListener('change', () => { captureElement.classList.toggle('animation-active', animationToggle.checked); });
 
         // --- State Management ---
-        function saveState() {
+        async function saveState() {
             const getElementState = (el) => ({
                 top: el.style.top,
                 left: el.style.left,
@@ -1064,28 +1155,28 @@
                 }
             };
             try {
-                localStorage.setItem('mastaarDesignerState', JSON.stringify(state));
-                alert('تم حفظ الإعدادات بنجاح!');
+                await dbInstance.set('mastaarDesignerState', state);
+                showModal('تم حفظ الإعدادات بنجاح!');
             } catch (e) {
-                alert('فشل حفظ الإعدادات. قد تكون مساحة التخزين ممتلئة (بسبب صورة كبيرة مثلاً).');
+                console.error("Failed to save state:", e);
+                showModal('فشل حفظ الإعدادات. يرجى مراجعة الكونسول للمزيد من التفاصيل.');
             }
         }
 
-        function loadState() {
-            const stateJSON = localStorage.getItem('mastaarDesignerState');
-            if (!stateJSON) {
+        async function loadState() {
+            const state = await dbInstance.get('mastaarDesignerState');
+            if (!state) {
                 updateCanvasSize(customWidthInput.value, customHeightInput.value);
                 syncControlsFromCanvas();
                 return;
             }
-            const state = JSON.parse(stateJSON);
 
             const restoreElement = (el, saved, isWrapper = false) => {
                 const contentEl = el.querySelector('h1, p, span') || el;
                 if(isWrapper) {
                      if(saved.style) contentEl.style.cssText = saved.style;
                 } else {
-                    if(saved.style) el.style.cssText = saved.style;
+                     if(saved.style) el.style.cssText = saved.style;
                 }
                 el.style.top = saved.top;
                 el.style.left = saved.left;
@@ -1104,7 +1195,8 @@
             restoreElement(websiteWrapper, state.website, true);
             
             restoreElement(lineWrapper, state.line);
-            glowingLine.style.cssText = state.line.style;
+            if (state.line.style) glowingLine.style.cssText = state.line.style;
+
 
             document.querySelectorAll('.custom-element').forEach(el => el.remove());
             state.customElements.forEach(elState => createAndPlaceElement({...elState, select: false}));
@@ -1138,9 +1230,13 @@
             syncControlsFromCanvas();
         }
 
-        function resetState() {
-            if(confirm('هل أنت متأكد أنك تريد إعادة تعيين كل شيء؟ سيتم حذف جميع الإعدادات المحفوظة.')) {
-                localStorage.removeItem('mastaarDesignerState');
+        async function resetState() {
+            const result = await showModal('هل أنت متأكد أنك تريد إعادة تعيين كل شيء؟ سيتم حذف جميع الإعدادات المحفوظة.', [
+                { text: 'إلغاء', type: 'cancel' },
+                { text: 'نعم، إعادة تعيين', type: 'confirm' }
+            ]);
+            if(result === 'confirm') {
+                await dbInstance.clear();
                 location.reload();
             }
         }
@@ -1156,6 +1252,10 @@
             
             if (document.activeElement) document.activeElement.blur();
 
+            // Hide outlines before capture
+            const outlines = document.querySelectorAll('.selected-element, .draggable:hover');
+            outlines.forEach(el => el.style.outline = 'none');
+
             html2canvas(captureElement, {
                 width: exportWidth,
                 height: exportHeight,
@@ -1168,6 +1268,9 @@
                 link.download = `mastaar-design.${get('format').value}`;
                 link.href = canvas.toDataURL(`image/${get('format').value}`, 1.0);
                 link.click();
+
+                // Restore outlines after capture
+                 outlines.forEach(el => el.style.outline = '');
             });
         });
 
@@ -1177,7 +1280,7 @@
         makeDraggable(logoWrapper);
         makeDraggable(lineWrapper);
         makeDraggable(websiteWrapper);
-        loadState();
+        await loadState();
     });
     </script>
 
